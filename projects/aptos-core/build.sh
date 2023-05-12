@@ -32,11 +32,17 @@ export CXXFLAGS="$CFLAGS $CXXFLAGS_EXTRA"
 cd testsuite/aptos-fuzzer/
 
 unset RUSTFLAGS
-export RUSTFLAGS="--cfg tokio_unstable -C link-arg=-l/usr/lib/libFuzzingEngine.a -Clink-arg=-lc++"
+
+# from aptos-core
+export RUSTFLAGS="--cfg tokio_unstable -C force-frame-pointers=yes -C force-unwind-tables=yes -C link-arg=-fuse-ld=lld -C target-feature=+sse4.2"
+
+# addl
+# export RUSTFLAGS="${RUSTFLAGS} -C link-arg=-l/usr/lib/libFuzzingEngine.a -Clink-arg=-lc++"
 # fuzzers=$(cargo +nightly run --bin aptos-fuzzer list --no-desc)
 fuzzers="ValueTarget"
 
-export RUSTFLAGS="${RUSTFLAGS} --cfg fuzzing -Zsanitizer=address -Cdebug-assertions -Cdebuginfo=1 -Cforce-frame-pointers"
+# https://github.com/rust-lang/rust/issues/110682
+# export RUSTFLAGS="${RUSTFLAGS} --cfg fuzzing -Zsanitizer=address -Cdebug-assertions -Cdebuginfo=1 -Cforce-frame-pointers -Zinline-mir-threshold=10000 -Zinline-mir-hint-threshold=10000 -Zmir-opt-level=3"
 
 cd fuzz
 for fuzzer_name in $fuzzers; do
